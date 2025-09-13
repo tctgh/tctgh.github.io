@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互动表情页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .emoji-container {
+            margin: 30px 0;
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .emoji {
+            font-size: 100px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-origin: center;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 30px;
+            position: relative;
+        }
+        
+        .btn {
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-yes {
+            background: linear-gradient(to right, #4caf50, #8bc34a);
+            color: white;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-yes:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-no {
+            background: linear-gradient(to right, #f44336, #ff9800);
+            color: white;
+            position: relative;
+            transition: transform 0.5s ease;
+        }
+        
+        .btn-no:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.3);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 15px;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .result.show {
+            opacity: 1;
+            height: auto;
+            padding: 20px;
+        }
+        
+        .result-emoji {
+            font-size: 80px;
+            margin-bottom: 15px;
+        }
+        
+        .result-text {
+            font-size: 22px;
+            color: #4caf50;
+            font-weight: 600;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .shake {
+            animation: shake 0.4s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>今天心情怎么样？</h1>
+        
+        <div class="emoji-container">
+            <div class="emoji" id="emoji">😊</div>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn btn-yes" id="yesBtn">可以</button>
+            <button class="btn btn-no" id="noBtn">不可以</button>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-emoji">🎉</div>
+            <div class="result-text">太棒了！祝你天天好心情！</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emoji = document.getElementById('emoji');
+            const yesBtn = document.getElementById('yesBtn');
+            const noBtn = document.getElementById('noBtn');
+            const result = document.getElementById('result');
+            
+            const expressions = ['😊', '😕', '😟', '😦', '😮', '😲', '😳', '😨', '😰', '😥', '😢', '😭'];
+            let clickCount = 0;
+            let yesScale = 1;
+            
+            noBtn.addEventListener('click', function() {
+                // 增加点击计数
+                clickCount++;
+                
+                // 放大"可以"按钮
+                yesScale += 0.2;
+                yesBtn.style.transform = `scale(${yesScale})`;
+                
+                // 移动"不可以"按钮
+                const moveX = Math.min(clickCount * 30, window.innerWidth);
+                const moveY = clickCount % 2 === 0 ? 50 : -50;
+                noBtn.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${clickCount * 15}deg)`;
+                
+                // 改变表情
+                const expressionIndex = Math.min(clickCount, expressions.length - 1);
+                emoji.textContent = expressions[expressionIndex];
+                
+                // 添加抖动效果
+                emoji.classList.add('shake');
+                setTimeout(() => {
+                    emoji.classList.remove('shake');
+                }, 400);
+                
+                // 如果按钮移出屏幕，重置位置
+                if (moveX > window.innerWidth - 100) {
+                    setTimeout(() => {
+                        noBtn.style.transform = 'translate(0, 0)';
+                        clickCount = 0;
+                        yesScale = 1;
+                        yesBtn.style.transform = 'scale(1)';
+                        emoji.textContent = expressions[0];
+                    }, 800);
+                }
+            });
+            
+            yesBtn.addEventListener('click', function() {
+                result.classList.add('show');
+                emoji.textContent = '😍';
+                
+                // 隐藏按钮
+                yesBtn.style.display = 'none';
+                noBtn.style.display = 'none';
+                
+                // 添加庆祝效果
+                emoji.style.fontSize = '120px';
+                setTimeout(() => {
+                    emoji.style.fontSize = '100px';
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
+
